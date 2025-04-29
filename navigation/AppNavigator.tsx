@@ -15,9 +15,18 @@ export default function Tabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarStyle: { backgroundColor: '#000' },
-        tabBarLabelStyle: { color: '#fff' },
-        tabBarIcon: ({ size, focused }) => {
+        tabBarStyle: {
+          backgroundColor: '#ffffff', // White background for tab bar
+          borderTopColor: '#dddddd',  // Light top border
+          height: 70,                 // Slightly taller for better design
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          marginBottom: 6,
+        },
+        tabBarActiveTintColor: '#D94F4F', // Reddish-pink active icons and labels
+        tabBarInactiveTintColor: '#888888', // Gray inactive icons and labels
+        tabBarIcon: ({ color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap = 'home';
 
           switch (route.name) {
@@ -38,13 +47,7 @@ export default function Tabs() {
               break;
           }
 
-          return (
-            <Ionicons
-              name={iconName}
-              size={size}
-              color={focused ? '#39FF14' : '#888'}
-            />
-          );
+          return <Ionicons name={iconName} size={size} color={color} />; // ✅ Now uses passed color
         },
       })}
     >

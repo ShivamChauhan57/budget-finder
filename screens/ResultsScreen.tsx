@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { getBudgetRecommendations } from '../services/chatAPI';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native-safe-area-context'; // ✅ NEW
 
 type Bundle = {
   flight: string;
@@ -115,105 +116,157 @@ const ResultsScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.heading}>Top {category} Picks</Text>
-      <Text style={styles.subheading}>Budget: ${budget}</Text>
+    <SafeAreaView style={styles.safeContainer}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.heading}>Top {category} Picks</Text>
+        <Text style={styles.subheading}>Budget: ${budget}</Text>
 
-      {(category === 'Travel' || category === 'Hotels' || category === 'Travel Bundle') && (
-        <>
-          <Text style={styles.subheading}>From: {departure} ➡️ To: {destination}</Text>
-          <Text style={styles.subheading}>Date: {new Date(date || '').toDateString()}</Text>
-          <Text style={styles.subheading}>Travelers: {people}</Text>
-        </>
-      )}
+        {(category === 'Travel' || category === 'Hotels' || category === 'Travel Bundle') && (
+          <>
+            <Text style={styles.subheading}>From: {departure} ➡️ To: {destination}</Text>
+            <Text style={styles.subheading}>Date: {new Date(date || '').toDateString()}</Text>
+            <Text style={styles.subheading}>Travelers: {people}</Text>
+          </>
+        )}
 
-      {loading && <ActivityIndicator size="large" color="#00ff99" style={{ marginTop: 20 }} />}
-      {!loading && results.length === 0 && (
-        <Text style={styles.noResults}>No results found 😢</Text>
-      )}
+        {loading && <ActivityIndicator size="large" color="#D94F4F" style={{ marginTop: 20 }} />}
+        {!loading && results.length === 0 && (
+          <Text style={styles.noResults}>No results found 😢</Text>
+        )}
 
-      {category === 'Travel Bundle'
-        ? (results as Bundle[]).map((bundle, index) => {
-            const label = `Flight: ${bundle.flight}\nHotel: ${bundle.hotel}\nTotal: ${bundle.total}`;
-            return (
-              <View key={index} style={styles.bundleCard}>
-                <TouchableOpacity style={styles.heart} onPress={() => toggleFavorite(label)}>
+        {category === 'Travel Bundle'
+          ? (results as Bundle[]).map((bundle, index) => {
+              const label = `Flight: ${bundle.flight}\nHotel: ${bundle.hotel}\nTotal: ${bundle.total}`;
+              return (
+                <View key={index} style={styles.bundleCard}>
+                  <TouchableOpacity style={styles.heart} onPress={() => toggleFavorite(label)}>
+                    <Ionicons
+                      name={favorites.has(label) ? 'heart' : 'heart-outline'}
+                      size={24}
+                      color={favorites.has(label) ? '#ff5e5e' : '#ccc'}
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.bundleFlight}>✈️ Flight: {bundle.flight}</Text>
+                  <Text style={styles.bundleHotel}>🏨 Hotel: {bundle.hotel}</Text>
+                  <View style={styles.separator} />
+                  <Text style={styles.bundleTotal}>💰 Total Bundle: {bundle.total}</Text>
+                </View>
+              );
+            })
+          : (results as string[]).map((name, index) => (
+              <View key={index} style={styles.card}>
+                <TouchableOpacity style={styles.heart} onPress={() => toggleFavorite(name)}>
                   <Ionicons
-                    name={favorites.has(label) ? 'heart' : 'heart-outline'}
+                    name={favorites.has(name) ? 'heart' : 'heart-outline'}
                     size={24}
-                    color={favorites.has(label) ? '#ff5e5e' : '#ccc'}
+                    color={favorites.has(name) ? '#ff5e5e' : '#ccc'}
                   />
                 </TouchableOpacity>
-                <Text style={styles.bundleFlight}>✈️ Flight: {bundle.flight}</Text>
-                <Text style={styles.bundleHotel}>🏨 Hotel: {bundle.hotel}</Text>
-                <View style={styles.separator} />
-                <Text style={styles.bundleTotal}>💰 Total Bundle: {bundle.total}</Text>
+                <View style={styles.content}>
+                  <Text style={styles.name}>{name}</Text>
+                  <TouchableOpacity
+                    onPress={() =>
+                      Linking.openURL(`https://www.google.com/search?q=${encodeURIComponent(formatSearchQuery(name))}`)
+                    }
+                  >
+                    <Text style={styles.link}>Search on Google</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            );
-          })
-        : (results as string[]).map((name, index) => (
-            <View key={index} style={styles.card}>
-              <TouchableOpacity style={styles.heart} onPress={() => toggleFavorite(name)}>
-                <Ionicons
-                  name={favorites.has(name) ? 'heart' : 'heart-outline'}
-                  size={24}
-                  color={favorites.has(name) ? '#ff5e5e' : '#ccc'}
-                />
-              </TouchableOpacity>
-              <View style={styles.content}>
-                <Text style={styles.name}>{name}</Text>
-                <TouchableOpacity
-                  onPress={() =>
-                    Linking.openURL(`https://www.google.com/search?q=${encodeURIComponent(formatSearchQuery(name))}`)
-                  }
-                >
-                  <Text style={styles.link}>Search on Google</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))}
-    </ScrollView>
+            ))}
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: '#0d0d0d', padding: 10, flex: 1 },
-  heading: { fontSize: 22, fontWeight: 'bold', color: '#fff', textAlign: 'center', marginBottom: 6 },
-  subheading: { fontSize: 15, color: '#bbb', textAlign: 'center', marginBottom: 4 },
-  noResults: { color: '#aaa', fontSize: 16, textAlign: 'center', marginTop: 20 },
+  safeContainer: { flex: 1, backgroundColor: '#ffffff' }, // ✅ New
+  container: { padding: 10 },
+
+  heading: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#D94F4F',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  subheading: {
+    fontSize: 15,
+    color: '#555',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  noResults: {
+    color: '#888',
+    fontSize: 16,
+    textAlign: 'center',
+    marginTop: 20,
+  },
+
   card: {
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#f8f8f8',
     borderRadius: 12,
     marginBottom: 20,
     padding: 12,
     elevation: 3,
     position: 'relative',
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
-  content: { paddingTop: 12 },
-  name: { color: '#fff', fontSize: 20, fontWeight: '600' },
-  link: { marginTop: 6, color: '#5cb85c', fontWeight: 'bold' },
+  content: {
+    paddingTop: 12,
+  },
+  name: {
+    color: '#222',
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  link: {
+    marginTop: 6,
+    color: '#D94F4F',
+    fontWeight: 'bold',
+  },
   heart: {
     position: 'absolute',
     top: 12,
     right: 12,
-    backgroundColor: '#00000088',
+    backgroundColor: '#ffffffcc',
     padding: 6,
     borderRadius: 20,
     zIndex: 10,
   },
+
   bundleCard: {
-    backgroundColor: '#222',
+    backgroundColor: '#f9f9f9',
     borderRadius: 14,
     padding: 16,
     marginBottom: 16,
     borderLeftWidth: 6,
-    borderLeftColor: '#5cb85c',
+    borderLeftColor: '#D94F4F',
     position: 'relative',
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
-  bundleFlight: { fontSize: 16, color: '#f2f2f2', marginBottom: 4 },
-  bundleHotel: { fontSize: 16, color: '#f2f2f2', marginBottom: 4 },
-  bundleTotal: { fontSize: 18, color: '#ffd700', fontWeight: 'bold' },
-  separator: { height: 1, backgroundColor: '#444', marginVertical: 8 },
+  bundleFlight: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 4,
+  },
+  bundleHotel: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 4,
+  },
+  bundleTotal: {
+    fontSize: 18,
+    color: '#D94F4F',
+    fontWeight: 'bold',
+  },
+  separator: {
+    height: 1,
+    backgroundColor: '#ccc',
+    marginVertical: 8,
+  },
 });
 
 export default ResultsScreen;

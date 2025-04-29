@@ -72,18 +72,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#0a0a0a',
+    backgroundColor: '#ffffff', // White background
   },
   centeredContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#0a0a0a',
+    backgroundColor: '#ffffff',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#5cb85c',
+    color: '#D94F4F', // New theme color
     marginBottom: 16,
     textAlign: 'center',
   },
@@ -93,15 +93,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    borderBottomColor: '#ddd', // Light border
   },
   itemText: {
     fontSize: 18,
-    color: '#fff',
+    color: '#222', // Dark text
     flex: 1,
   },
   removeText: {
-    color: '#ff5e5e',
+    color: '#D94F4F', // Match theme
     fontWeight: 'bold',
     paddingLeft: 12,
   },
@@ -109,6 +109,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
     fontSize: 16,
-    color: '#999',
+    color: '#888',
   },
 });
+
