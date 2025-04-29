@@ -1,51 +1,114 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+// screens/FavoritesScreen.tsx
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
+import { useFavorites } from '../context/FavoritesContext';
 
-const mockFavorites = [
-  { id: '1', name: 'Cheap Eats in Tampa', price: '$10' },
-  { id: '2', name: 'Roundtrip to Atlanta', price: '$120' },
-];
+const FavoritesScreen = () => {
+  const { favorites, removeFavorite } = useFavorites(); // ❗ no loading from context (not implemented there)
+  const isFocused = useIsFocused();
 
-export default function FavoritesScreen() {
+  const [localLoading, setLocalLoading] = useState(true);
+
+  useEffect(() => {
+    if (isFocused) {
+      setLocalLoading(true);
+      const timeout = setTimeout(() => {
+        setLocalLoading(false);
+      }, 300); // slight delay for smoother refresh
+      console.log('✅ Favorites updated:', favorites);
+      return () => clearTimeout(timeout);
+    }
+  }, [favorites, isFocused]);
+
+  const handleRemove = (item: string) => {
+    removeFavorite(item);
+    console.log(`🗑️ Removed from favorites: ${item}`);
+  };
+
+  if (localLoading) {
+    return (
+      <View style={styles.centeredContainer}>
+        <ActivityIndicator size="large" color="#5cb85c" />
+      </View>
+    );
+  }
+
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Saved Favorites</Text>
-      {mockFavorites.map((fav) => (
-        <View key={fav.id} style={styles.card}>
-          <Text style={styles.cardTitle}>{fav.name}</Text>
-          <Text style={styles.cardText}>Saved Price: {fav.price}</Text>
-        </View>
-      ))}
-    </ScrollView>
+    <View style={styles.container}>
+      <Text style={styles.title}>Your Favorites</Text>
+
+      {favorites.length === 0 ? (
+        <Text style={styles.emptyText}>No favorites added yet.</Text>
+      ) : (
+        <FlatList
+          data={favorites}
+          keyExtractor={(item, index) => `${item}-${index}`}
+          renderItem={({ item }) => (
+            <View style={styles.item}>
+              <Text style={styles.itemText}>{item}</Text>
+              <TouchableOpacity onPress={() => handleRemove(item)}>
+                <Text style={styles.removeText}>Remove</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          contentContainerStyle={{ paddingBottom: 30 }}
+        />
+      )}
+    </View>
   );
-}
+};
+
+export default FavoritesScreen;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#000',
+    flex: 1,
     padding: 16,
+    backgroundColor: '#0a0a0a',
+  },
+  centeredContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#0a0a0a',
   },
   title: {
-    fontSize: 28,
-    color: '#39FF14',
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 12,
+    color: '#5cb85c',
+    marginBottom: 16,
+    textAlign: 'center',
   },
-  card: {
-    backgroundColor: '#111',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 12,
-    borderColor: '#00e0ff',
-    borderWidth: 1,
+  item: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
   },
-  cardTitle: {
-    color: '#fff',
+  itemText: {
     fontSize: 18,
-    fontWeight: '600',
+    color: '#fff',
+    flex: 1,
   },
-  cardText: {
-    color: '#ccc',
-    fontSize: 14,
+  removeText: {
+    color: '#ff5e5e',
+    fontWeight: 'bold',
+    paddingLeft: 12,
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
+    color: '#999',
   },
 });
