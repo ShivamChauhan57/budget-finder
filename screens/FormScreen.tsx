@@ -9,8 +9,9 @@ import {
   Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context'; // ✅ New
+import { SafeAreaView } from 'react-native-safe-area-context';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 
@@ -23,25 +24,38 @@ const FormScreen = () => {
   const [departure, setDeparture] = useState('');
   const [destination, setDestination] = useState('');
   const [people, setPeople] = useState('1');
-  const [date, setDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+  const [dietaryRestriction, setDietaryRestriction] = useState('');
 
   const handleSearch = () => {
+    const params: any = {
+      category,
+      budget,
+    };
+
+    if (category === 'Food') {
+      params.location = location;
+      params.dietaryRestriction = dietaryRestriction;
+    } else if (category === 'Travel Bundle') {
+      params.departure = departure;
+      params.destination = destination;
+      params.people = people;
+      params.date = startDate.toISOString();
+    } else if (category === 'Hidden Gems') {
+      params.location = location;
+    }
+
     navigation.navigate('Main', {
       screen: 'Results',
-      params: {
-        category,
-        budget,
-        location,
-        departure,
-        destination,
-        people,
-        date: date.toISOString(),
-      },
+      params,
     });
   };
 
-  const categories = ['Food', 'Travel', 'Shopping', 'Hotels', 'Travel Bundle'];
+  const categories = ['Food', 'Travel Bundle', 'Hidden Gems'];
+  const dietaryOptions = ['', 'Vegan', 'Vegetarian', 'Gluten-Free', 'Dairy-Free', 'Nut-Free'];
 
   return (
     <SafeAreaView style={styles.safeContainer}>
@@ -73,16 +87,32 @@ const FormScreen = () => {
           placeholderTextColor="#999"
         />
 
-        <Text style={styles.label}>Location</Text>
-        <TextInput
-          style={styles.input}
-          value={location}
-          onChangeText={setLocation}
-          placeholder="Enter a city"
-          placeholderTextColor="#999"
-        />
+        {category === 'Food' && (
+          <>
+            <Text style={styles.label}>Location</Text>
+            <TextInput
+              style={styles.input}
+              value={location}
+              onChangeText={setLocation}
+              placeholder="Enter a city"
+              placeholderTextColor="#999"
+            />
 
-        {(category === 'Travel' || category === 'Hotels' || category === 'Travel Bundle') && (
+            <Text style={styles.label}>Dietary Restrictions</Text>
+            <View style={styles.pickerWrapper}>
+              <Picker
+                selectedValue={dietaryRestriction}
+                onValueChange={(itemValue) => setDietaryRestriction(itemValue)}
+              >
+                {dietaryOptions.map((option) => (
+                  <Picker.Item key={option} label={option || 'None'} value={option} />
+                ))}
+              </Picker>
+            </View>
+          </>
+        )}
+
+        {category === 'Travel Bundle' && (
           <>
             <Text style={styles.label}>Departure Location</Text>
             <TextInput
@@ -102,23 +132,34 @@ const FormScreen = () => {
               placeholderTextColor="#999"
             />
 
-            <Text style={styles.label}>Travel Date</Text>
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Text style={styles.dateText}>{date.toDateString()}</Text>
+            <Text style={styles.label}>Travel Start Date</Text>
+            <TouchableOpacity style={styles.dateButton} onPress={() => setShowStartPicker(true)}>
+              <Text style={styles.dateText}>{startDate.toDateString()}</Text>
             </TouchableOpacity>
-
-            {showDatePicker && (
+            {showStartPicker && (
               <DateTimePicker
-                value={date}
+                value={startDate}
                 mode="date"
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={(event, selectedDate) => {
-                  const currentDate = selectedDate || date;
-                  setShowDatePicker(false);
-                  setDate(currentDate);
+                onChange={(e, selectedDate) => {
+                  setShowStartPicker(false);
+                  setStartDate(selectedDate || startDate);
+                }}
+              />
+            )}
+
+            <Text style={styles.label}>Travel End Date</Text>
+            <TouchableOpacity style={styles.dateButton} onPress={() => setShowEndPicker(true)}>
+              <Text style={styles.dateText}>{endDate.toDateString()}</Text>
+            </TouchableOpacity>
+            {showEndPicker && (
+              <DateTimePicker
+                value={endDate}
+                mode="date"
+                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                onChange={(e, selectedDate) => {
+                  setShowEndPicker(false);
+                  setEndDate(selectedDate || endDate);
                 }}
               />
             )}
@@ -135,6 +176,19 @@ const FormScreen = () => {
           </>
         )}
 
+        {category === 'Hidden Gems' && (
+          <>
+            <Text style={styles.label}>Location</Text>
+            <TextInput
+              style={styles.input}
+              value={location}
+              onChangeText={setLocation}
+              placeholder="Enter a city"
+              placeholderTextColor="#999"
+            />
+          </>
+        )}
+
         <TouchableOpacity style={styles.button} onPress={handleSearch}>
           <Text style={styles.buttonText}>Find Recommendations</Text>
         </TouchableOpacity>
@@ -146,7 +200,7 @@ const FormScreen = () => {
 const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
-    backgroundColor: '#ffffff', // Matches theme
+    backgroundColor: '#ffffff',
   },
   container: {
     padding: 16,
@@ -222,6 +276,13 @@ const styles = StyleSheet.create({
   },
   dateText: {
     color: '#333',
+  },
+  pickerWrapper: {
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    marginTop: 8,
   },
 });
 

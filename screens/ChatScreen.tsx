@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context'; // ✅ Add SafeAreaView
 
 const mockMessages = [
   { id: '1', user: 'Alex', message: "What's the best food deal under $10?" },
@@ -9,44 +10,51 @@ const mockMessages = [
 
 export default function ChatScreen() {
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Community Chat</Text>
-      {mockMessages.map((msg) => (
-        <View key={msg.id} style={styles.messageCard}>
-          <Text style={styles.username}>@{msg.user}</Text>
-          <Text style={styles.messageText}>{msg.message}</Text>
-        </View>
-      ))}
-    </ScrollView>
+    <SafeAreaView style={styles.safeContainer}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Community Chat</Text>
+        {mockMessages.map((msg) => (
+          <View key={msg.id} style={styles.messageCard}>
+            <Text style={styles.username}>@{msg.user}</Text>
+            <Text style={styles.messageText}>{msg.message}</Text>
+          </View>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeContainer: {
+    flex: 1,
+    backgroundColor: '#ffffff', // White background
+  },
   container: {
-    backgroundColor: '#000',
     padding: 16,
   },
   title: {
-    color: '#39FF14',
+    color: '#D94F4F', // App accent color
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 16,
+    textAlign: 'center',
   },
   messageCard: {
-    backgroundColor: '#111',
+    backgroundColor: '#f9f9f9', // Light card background
     padding: 12,
     borderRadius: 8,
     marginBottom: 12,
-    borderLeftColor: '#39FF14',
+    borderLeftColor: '#D94F4F', // Accent colored border
     borderLeftWidth: 4,
   },
   username: {
-    color: '#00e0ff',
+    color: '#D94F4F', // Match primary theme color
     fontWeight: 'bold',
     marginBottom: 4,
+    fontSize: 16,
   },
   messageText: {
-    color: '#fff',
+    color: '#222', // Dark text
     fontSize: 16,
   },
 });

@@ -7,55 +7,67 @@ export async function getBudgetRecommendations(
   departure?: string,
   destination?: string,
   date?: string,
-  people?: string
+  people?: string,
+  dietaryRestriction?: string
 ): Promise<string[]> {
   let prompt = '';
   const cat = category.toLowerCase();
 
   // 👇 Generate category-specific prompt
-  if (cat === 'travel bundle') {
-    prompt = `List exactly 5 travel bundles from ${departure} to ${destination} on ${date} for ${people} people under $${budget}. 
-Each bundle must include:
-- A flight (airline name and price)
-- A hotel (name and price)
-- A total cost (flight + hotel)
-
-⚠️ IMPORTANT: Do NOT include any explanations, disclaimers, or extra descriptions.
-
-ONLY return the results in this strict format:
-1. Flight: Airline XYZ - $250
-   Hotel: Cozy Inn - $300
-   Total: $550
-2. ...
-3. ...
-4. ...
-5. ...
-`;
-  } else if (cat === 'travel') {
-    prompt = `Suggest 10 budget-friendly travel activities or experiences in ${destination}, for a trip from ${departure} on ${date}, for ${people} person(s), under $${budget}.
-Only return the activity names as a numbered list:
-1. Activity One
-2. Activity Two
-...`;
-  } else if (cat === 'hotels') {
-    prompt = `List 10 budget hotels in ${location} with prices under $${budget} per night.
-Only return hotel names as a numbered list:
-1. Hotel One
-2. Hotel Two
-...`;
-  } else if (cat === 'shopping') {
-    prompt = `List 10 budget-friendly shopping locations or malls in ${location} where items can be found under $${budget}.
-Only return shop names as a numbered list:
-1. Shop One
-2. Shop Two
-...`;
-  } else {
-    prompt = `List 10 budget-friendly ${cat} places in ${location} under $${budget}.
-Only return the place names as a numbered list:
-1. Place One
-2. Place Two
-...`;
-  }
+    // 👇 Generate category-specific prompt
+    if (cat === 'travel bundle') {
+      prompt = `List exactly 5 travel bundles from ${departure} to ${destination} on ${date} for ${people} people under $${budget}. 
+  Each bundle must include:
+  - A flight (airline name and price)
+  - A hotel (name and price)
+  - A total cost (flight + hotel)
+  
+  ⚠️ IMPORTANT: Do NOT include any explanations, disclaimers, or extra descriptions.
+  
+  ONLY return the results in this strict format:
+  1. Flight: Airline XYZ - $250
+     Hotel: Cozy Inn - $300
+     Total: $550
+  2. ...
+  3. ...
+  4. ...
+  5. ...
+  `;
+    } else if (cat === 'hidden gems') {
+      prompt = `List exactly 15 hidden gem travel spots in ${location} that are lesser-known, unique, and worth visiting. 
+  ⚠️ Do NOT include any explanations, descriptions, or extra text.
+  
+  ONLY return the names in this strict numbered list format:
+  1. Hidden Gem One
+  2. Hidden Gem Two
+  ...
+  15. Hidden Gem Fifteen`;
+    } else if (cat === 'travel') {
+      prompt = `Suggest 10 budget-friendly travel activities or experiences in ${destination}, for a trip from ${departure} on ${date}, for ${people} person(s), under $${budget}.
+  Only return the activity names as a numbered list:
+  1. Activity One
+  2. Activity Two
+  ...`;
+    } else if (cat === 'hotels') {
+      prompt = `List 10 budget hotels in ${location} with prices under $${budget} per night.
+  Only return hotel names as a numbered list:
+  1. Hotel One
+  2. Hotel Two
+  ...`;
+    } else if (cat === 'shopping') {
+      prompt = `List 10 budget-friendly shopping locations or malls in ${location} where items can be found under $${budget}.
+  Only return shop names as a numbered list:
+  1. Shop One
+  2. Shop Two
+  ...`;
+    } else {
+      prompt = `List 10 budget-friendly ${cat} places in ${location}. I want to spend $${budget} with dietary restriction: ${dietaryRestriction}.
+  Only return the place names as a numbered list:
+  1. Place One
+  2. Place Two
+  ...`;
+    }
+  
 
   console.log('📤 Prompt sent to Gemini:\n', prompt);
 

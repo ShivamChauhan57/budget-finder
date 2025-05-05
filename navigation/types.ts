@@ -9,6 +9,7 @@ export type TabParamList = {
     destination: string;
     people: string;
     date: string;
+    dietaryRestriction: string; 
   };
   Favorites: undefined;
   News: undefined;
